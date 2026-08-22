@@ -1,14 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, MapPin, Trash2, Edit, Eye, Plus } from 'lucide-react';
+import { Calendar, MapPin, Trash2, Edit, Eye, Plus, Share2 } from 'lucide-react';
 import { tripsAPI } from '../api/trips.api';
+import { shareAPI } from '../api/share.api';
 import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import ListToolbar from '../components/common/ListToolbar';
 import Modal from '../components/common/Modal';
 import Loader from '../components/common/Loader';
+import ShareModal from '../components/trips/ShareModal';
 import toast from 'react-hot-toast';
 import './MyTripsPage.css';
 
@@ -18,10 +20,22 @@ export default function MyTripsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [deleteTrip, setDeleteTrip] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
 
   const { data: tripsData, isLoading } = useQuery({
     queryKey: ['trips'],
     queryFn: () => tripsAPI.getAll(),
+  });
+
+  const shareMutation = useMutation({
+    mutationFn: (tripId) => shareAPI.enableSharing(tripId),
+    onSuccess: (res) => {
+      const token = res?.data?.shareToken || res?.shareToken || 'shared';
+      setShareUrl(`${window.location.origin}/public/trips/${token}`);
+      setShareOpen(true);
+    },
+    onError: (err) => toast.error(err.message || 'Failed to create share link'),
   });
 
   const deleteMutation = useMutation({
@@ -80,6 +94,7 @@ export default function MyTripsPage() {
                 <div className="trip-card-actions">
                   <Button variant="ghost" size="sm" icon={Eye} onClick={() => navigate(`/trips/${trip.id}/itinerary`)}>View</Button>
                   <Button variant="ghost" size="sm" icon={Edit} onClick={() => navigate(`/trips/${trip.id}/build`)}>Edit</Button>
+                  <Button variant="ghost" size="sm" icon={Share2} onClick={() => shareMutation.mutate(trip.id)} disabled={shareMutation.isPending}>Share</Button>
                   <Button variant="ghost" size="sm" icon={Trash2} onClick={() => setDeleteTrip(trip)} className="btn-delete">Delete</Button>
                 </div>
               </div>
@@ -142,6 +157,9 @@ export default function MyTripsPage() {
           </Button>
         </div>
       </Modal>
+
+      {/* Share Modal */}
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} shareUrl={shareUrl} />
     </div>
   );
 }

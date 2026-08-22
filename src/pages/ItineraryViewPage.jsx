@@ -37,7 +37,8 @@ export default function ItineraryViewPage() {
   const shareMutation = useMutation({
     mutationFn: () => shareAPI.enableSharing(tripId),
     onSuccess: (res) => {
-      const url = res?.data?.shareUrl || res?.shareUrl || `${window.location.origin}/public/trips/${res?.data?.shareToken || 'shared'}`;
+      const token = res?.data?.shareToken || res?.shareToken || 'shared';
+      const url = `${window.location.origin}/public/trips/${token}`;
       setShareUrl(url);
       setShowShare(true);
     },
