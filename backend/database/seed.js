@@ -39,79 +39,108 @@ async function seed() {
     }
 
     // ─── 2. Cities seed data ────────────────────────────────────
-    const citiesExist = await client.query('SELECT COUNT(*) FROM cities');
-    if (parseInt(citiesExist.rows[0].count) === 0) {
-      const cities = [
-        ['Paris', 'France', 'Europe', 'The City of Light, famous for the Eiffel Tower, Louvre Museum, and world-class cuisine.', 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600', 8.5, 9.5, 48.8566, 2.3522],
-        ['Rome', 'Italy', 'Europe', 'The Eternal City with ancient ruins, Renaissance art, and incredible Italian food.', 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600', 7.0, 9.0, 41.9028, 12.4964],
-        ['Barcelona', 'Spain', 'Europe', 'A vibrant city known for Gaudi architecture, beaches, and bustling nightlife.', 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600', 6.5, 8.5, 41.3874, 2.1686],
-        ['London', 'United Kingdom', 'Europe', 'A global metropolis with royal palaces, world-class museums, and diverse culture.', 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600', 9.0, 9.5, 51.5074, -0.1278],
-        ['Amsterdam', 'Netherlands', 'Europe', 'Famous for canals, cycling culture, Van Gogh Museum, and tulip gardens.', 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600', 7.5, 8.0, 52.3676, 4.9041],
-        ['Tokyo', 'Japan', 'Asia', 'A dazzling blend of ancient temples, cutting-edge technology, and culinary mastery.', 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600', 8.0, 9.5, 35.6762, 139.6503],
-        ['Kyoto', 'Japan', 'Asia', 'Japan\'s cultural heart with thousands of temples, gardens, and geisha districts.', 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600', 7.0, 8.5, 35.0116, 135.7681],
-        ['New York', 'United States', 'Americas', 'The Big Apple — iconic skyline, Broadway shows, Central Park, and diverse neighborhoods.', 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600', 9.5, 9.5, 40.7128, -74.0060],
-        ['Sydney', 'Australia', 'Oceania', 'Famous for the Opera House, Harbour Bridge, and beautiful beaches.', 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=600', 8.0, 9.0, -33.8688, 151.2093],
-        ['Cape Town', 'South Africa', 'Africa', 'Where Table Mountain meets the ocean — stunning nature and vibrant culture.', 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600', 4.5, 8.0, -33.9249, 18.4241],
-      ];
+    const cities = [
+      ['Paris', 'France', 'Europe', 'The City of Light, famous for the Eiffel Tower, Louvre Museum, and world-class cuisine.', 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600', 8.5, 9.5, 48.8566, 2.3522],
+      ['Rome', 'Italy', 'Europe', 'The Eternal City with ancient ruins, Renaissance art, and incredible Italian food.', 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600', 7.0, 9.0, 41.9028, 12.4964],
+      ['Barcelona', 'Spain', 'Europe', 'A vibrant city known for Gaudi architecture, beaches, and bustling nightlife.', 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600', 6.5, 8.5, 41.3874, 2.1686],
+      ['London', 'United Kingdom', 'Europe', 'A global metropolis with royal palaces, world-class museums, and diverse culture.', 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600', 9.0, 9.5, 51.5074, -0.1278],
+      ['Amsterdam', 'Netherlands', 'Europe', 'Famous for canals, cycling culture, Van Gogh Museum, and tulip gardens.', 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600', 7.5, 8.0, 52.3676, 4.9041],
+      ['Tokyo', 'Japan', 'Asia', 'A dazzling blend of ancient temples, cutting-edge technology, and culinary mastery.', 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600', 8.0, 9.5, 35.6762, 139.6503],
+      ['Kyoto', 'Japan', 'Asia', 'Japan\'s cultural heart with thousands of temples, gardens, and geisha districts.', 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600', 7.0, 8.5, 35.0116, 135.7681],
+      ['New York', 'United States', 'Americas', 'The Big Apple — iconic skyline, Broadway shows, Central Park, and diverse neighborhoods.', 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600', 9.5, 9.5, 40.7128, -74.0060],
+      ['Sydney', 'Australia', 'Oceania', 'Famous for the Opera House, Harbour Bridge, and beautiful beaches.', 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=600', 8.0, 9.0, -33.8688, 151.2093],
+      ['Cape Town', 'South Africa', 'Africa', 'Where Table Mountain meets the ocean — stunning nature and vibrant culture.', 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600', 4.5, 8.0, -33.9249, 18.4241],
+      ['Mumbai', 'India', 'Asia', 'The city of dreams, home to Bollywood, gateway of India, and vibrant street food.', 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=600', 4.5, 8.5, 18.9750, 72.8258],
+      ['Delhi', 'India', 'Asia', 'The historic capital city offering a blend of rich heritage, bustling bazaars, and Mughlai cuisine.', 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600', 4.0, 8.0, 28.6139, 77.2090],
+      ['Jaipur', 'India', 'Asia', 'The Pink City, famous for royal palaces, formidable forts, and traditional handicrafts.', 'https://images.unsplash.com/photo-1477584322813-ac79207038a8?w=600', 3.5, 8.0, 26.9124, 75.7873],
+      ['Agra', 'India', 'Asia', 'The city of Agra, home to the iconic Taj Mahal—one of the Seven Wonders of the World.', 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600', 4.0, 9.5, 27.1767, 78.0081],
+      ['Goa', 'India', 'Asia', 'Sunny coastline, seafood curries, 17th-century Portuguese churches, and vibrant beaches.', 'https://images.unsplash.com/photo-1512411961611-37f2257e8d1b?w=600', 5.0, 9.0, 15.2993, 73.9691]
+    ];
 
-      for (const [name, country, region, description, image, costIndex, popularity, lat, lon] of cities) {
+    let citiesInserted = 0;
+    for (const [name, country, region, description, image, costIndex, popularity, lat, lon] of cities) {
+      const exist = await client.query('SELECT id FROM cities WHERE name = $1', [name]);
+      if (exist.rows.length === 0) {
         await client.query(
           `INSERT INTO cities (name, country, region, description, image, cost_index, popularity, latitude, longitude)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [name, country, region, description, image, costIndex, popularity, lat, lon]
         );
+        citiesInserted++;
       }
-      console.log(`✅ ${cities.length} cities seeded`);
+    }
+    if (citiesInserted > 0) {
+      console.log(`✅ ${citiesInserted} new cities seeded`);
+    } else {
+      console.log('ℹ️  All cities already exist.');
     }
 
     // ─── 3. Activities seed data ─────────────────────────────────
-    const activitiesExist = await client.query('SELECT COUNT(*) FROM activities');
-    if (parseInt(activitiesExist.rows[0].count) === 0) {
-      const allCities = await client.query('SELECT id, name FROM cities');
-      const cityMap = {};
-      allCities.rows.forEach(c => { cityMap[c.name] = c.id; });
+    const allCities = await client.query('SELECT id, name FROM cities');
+    const cityMap = {};
+    allCities.rows.forEach(c => { cityMap[c.name] = c.id; });
 
-      const activityData = [
-        // Paris
-        ['Eiffel Tower Summit Tour', 'Paris', 'sightseeing', '3 hours', 45, 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=600', 4.9],
-        ['Louvre Museum Guided Tour', 'Paris', 'culture', '4 hours', 65, 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=600', 4.8],
-        ['Seine River Dinner Cruise', 'Paris', 'food', '2.5 hours', 95, 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600', 4.7],
-        ['Montmartre & Sacre-Coeur Walking Tour', 'Paris', 'sightseeing', '2 hours', 25, 'https://images.unsplash.com/photo-1509299349698-dd22323b5963?w=600', 4.6],
-        ['French Bakery & Pastry Masterclass', 'Paris', 'food', '3 hours', 80, 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600', 4.9],
-        ['Champs-Elysees Luxury Shopping Walk', 'Paris', 'shopping', '3 hours', 0, 'https://images.unsplash.com/photo-1520939817895-060bdef4dc1a?w=600', 4.5],
+    const activityData = [
+      // Paris
+      ['Eiffel Tower Summit Tour', 'Paris', 'sightseeing', '3 hours', 45, 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=600', 4.9],
+      ['Louvre Museum Guided Tour', 'Paris', 'culture', '4 hours', 65, 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=600', 4.8],
+      ['Seine River Dinner Cruise', 'Paris', 'food', '2.5 hours', 95, 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600', 4.7],
+      ['Montmartre & Sacre-Coeur Walking Tour', 'Paris', 'sightseeing', '2 hours', 25, 'https://images.unsplash.com/photo-1509299349698-dd22323b5963?w=600', 4.6],
+      ['French Bakery & Pastry Masterclass', 'Paris', 'food', '3 hours', 80, 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600', 4.9],
+      ['Champs-Elysees Luxury Shopping Walk', 'Paris', 'shopping', '3 hours', 0, 'https://images.unsplash.com/photo-1520939817895-060bdef4dc1a?w=600', 4.5],
 
-        // Rome
-        ['Colosseum & Roman Forum VIP Access', 'Rome', 'culture', '3.5 hours', 55, 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600', 4.9],
-        ['Vatican Museums & Sistine Chapel', 'Rome', 'culture', '4 hours', 70, 'https://images.unsplash.com/photo-1543429776-2782fc8e1acd?w=600', 4.8],
-        ['Authentic Pasta & Tiramisu Cooking Class', 'Rome', 'food', '3 hours', 75, 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600', 5.0],
-        ['Trastevere Evening Food & Wine Tour', 'Rome', 'food', '3.5 hours', 60, 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=600', 4.8],
-        ['Trevi Fountain & Spanish Steps Night Walk', 'Rome', 'nightlife', '2 hours', 20, 'https://images.unsplash.com/photo-1525874684015-58379d421a52?w=600', 4.7],
+      // Rome
+      ['Colosseum & Roman Forum VIP Access', 'Rome', 'culture', '3.5 hours', 55, 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600', 4.9],
+      ['Vatican Museums & Sistine Chapel', 'Rome', 'culture', '4 hours', 70, 'https://images.unsplash.com/photo-1543429776-2782fc8e1acd?w=600', 4.8],
+      ['Authentic Pasta & Tiramisu Cooking Class', 'Rome', 'food', '3 hours', 75, 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600', 5.0],
+      ['Trastevere Evening Food & Wine Tour', 'Rome', 'food', '3.5 hours', 60, 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=600', 4.8],
+      ['Trevi Fountain & Spanish Steps Night Walk', 'Rome', 'nightlife', '2 hours', 20, 'https://images.unsplash.com/photo-1525874684015-58379d421a52?w=600', 4.7],
 
-        // Tokyo
-        ['TeamLab Planets Digital Art Museum', 'Tokyo', 'culture', '2 hours', 38, 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=600', 4.9],
-        ['Tsukiji Outer Market Food Tasting Tour', 'Tokyo', 'food', '3 hours', 55, 'https://images.unsplash.com/photo-1554502078-ef0fc409efce?w=600', 4.8],
-        ['Shibuya Crossing & Harajuku Culture Tour', 'Tokyo', 'sightseeing', '3.5 hours', 30, 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600', 4.7],
-        ['Akihabara Anime & Gaming Tour', 'Tokyo', 'shopping', '2.5 hours', 25, 'https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=600', 4.6],
-        ['Shinjuku Golden Gai Bar Hopping', 'Tokyo', 'nightlife', '3 hours', 60, 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=600', 4.8],
+      // Tokyo
+      ['TeamLab Planets Digital Art Museum', 'Tokyo', 'culture', '2 hours', 38, 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=600', 4.9],
+      ['Tsukiji Outer Market Food Tasting Tour', 'Tokyo', 'food', '3 hours', 55, 'https://images.unsplash.com/photo-1554502078-ef0fc409efce?w=600', 4.8],
+      ['Shibuya Crossing & Harajuku Culture Tour', 'Tokyo', 'sightseeing', '3.5 hours', 30, 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600', 4.7],
+      ['Akihabara Anime & Gaming Tour', 'Tokyo', 'shopping', '2.5 hours', 25, 'https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=600', 4.6],
+      ['Shinjuku Golden Gai Bar Hopping', 'Tokyo', 'nightlife', '3 hours', 60, 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=600', 4.8],
 
-        // London
-        ['Tower of London & Crown Jewels', 'London', 'culture', '3 hours', 40, 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600', 4.8],
-        ['Westminster Abbey & Big Ben Tour', 'London', 'sightseeing', '2.5 hours', 35, 'https://images.unsplash.com/photo-1529655683826-aba9b3e77383?w=600', 4.7],
-        ['Borough Market Artisan Food Tour', 'London', 'food', '2 hours', 45, 'https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=600', 4.9],
-        ['Thames Speedboat RIB Experience', 'London', 'adventure', '1 hour', 50, 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?w=600', 4.8],
-      ];
+      // London
+      ['Tower of London & Crown Jewels', 'London', 'culture', '3 hours', 40, 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600', 4.8],
+      ['Westminster Abbey & Big Ben Tour', 'London', 'sightseeing', '2.5 hours', 35, 'https://images.unsplash.com/photo-1529655683826-aba9b3e77383?w=600', 4.7],
+      ['Borough Market Artisan Food Tour', 'London', 'food', '2 hours', 45, 'https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=600', 4.9],
+      ['Thames Speedboat RIB Experience', 'London', 'adventure', '1 hour', 50, 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?w=600', 4.8],
 
-      for (const [name, cityName, category, duration, cost, thumbnail, rating] of activityData) {
-        const cId = cityMap[cityName] || null;
+      // Mumbai
+      ['Gateway of India & Taj Mahal Palace Walk', 'Mumbai', 'sightseeing', '2 hours', 0, 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?w=600', 4.8],
+      ['Mumbai Street Food Tasting Tour', 'Mumbai', 'food', '3 hours', 20, 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600', 4.9],
+
+      // Delhi
+      ['Old Delhi Rickshaw Ride & Spice Market', 'Delhi', 'culture', '3 hours', 15, 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600', 4.7],
+
+      // Agra
+      ['Taj Mahal Sunrise Guided Tour', 'Agra', 'sightseeing', '3 hours', 30, 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600', 5.0],
+
+      // Goa
+      ['Grande Island Scuba Diving & Watersports', 'Goa', 'adventure', '6 hours', 50, 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600', 4.8],
+      ['Old Goa Churches & Spice Plantation Lunch', 'Goa', 'food', '5 hours', 22, 'https://images.unsplash.com/photo-1512411961611-37f2257e8d1b?w=600', 4.7]
+    ];
+
+    let activitiesInserted = 0;
+    for (const [name, cityName, category, duration, cost, thumbnail, rating] of activityData) {
+      const cId = cityMap[cityName] || null;
+      const exist = await client.query('SELECT id FROM activities WHERE name = $1', [name]);
+      if (exist.rows.length === 0) {
         await client.query(
           `INSERT INTO activities (city_id, name, description, category, duration, cost, thumbnail, rating)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
           [cId, name, `Experience ${name} in ${cityName}. Highly rated experience.`, category, duration, cost, thumbnail, rating]
         );
+        activitiesInserted++;
       }
-      console.log(`✅ ${activityData.length} activities seeded`);
+    }
+    if (activitiesInserted > 0) {
+      console.log(`✅ ${activitiesInserted} new activities seeded`);
     } else {
-      console.log('ℹ️  Activities already exist.');
+      console.log('ℹ️  All activities already exist.');
     }
 
     // ─── 4. Sample Public Community Trip ─────────────────────────
