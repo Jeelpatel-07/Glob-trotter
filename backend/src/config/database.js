@@ -5,6 +5,7 @@ const { Pool } = pg;
 
 const pool = new Pool({
   connectionString: config.database.url,
+  ssl: { rejectUnauthorized: false },
 });
 
 // Test connection on startup
