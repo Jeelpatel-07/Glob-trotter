@@ -17,7 +17,7 @@ export const getProfile = async (userId) => {
  * Update user profile
  */
 export const updateProfile = async (userId, data) => {
-  const { firstName, lastName, email, phone, city, country } = data;
+  const { firstName, lastName, email, phone, city, country, photo, language } = data;
 
   // If email is being changed, check for duplicates
   if (email) {
@@ -38,6 +38,8 @@ export const updateProfile = async (userId, data) => {
   if (phone !== undefined) { updates.push(`phone = $${paramIndex++}`); values.push(phone); }
   if (city !== undefined) { updates.push(`city = $${paramIndex++}`); values.push(city); }
   if (country !== undefined) { updates.push(`country = $${paramIndex++}`); values.push(country); }
+  if (photo !== undefined) { updates.push(`photo = $${paramIndex++}`); values.push(photo); }
+  if (language !== undefined) { updates.push(`language = $${paramIndex++}`); values.push(language); }
 
   if (updates.length === 0) {
     throw new ApiError('No fields to update', 400);

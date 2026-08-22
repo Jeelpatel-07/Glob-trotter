@@ -27,3 +27,13 @@ export const login = async (req, res, next) => {
     next(err);
   }
 };
+
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await authService.resetPasswordByEmail(email);
+    return sendMessage(res, 'Your password has been reset to "password123". Please log in and update it.');
+  } catch (err) {
+    next(err);
+  }
+};

@@ -25,16 +25,28 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [photo, setPhoto] = useState('');
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(registerSchema),
   });
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhoto(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const onSubmit = async (data) => {
     setLoading(true);
     setServerError('');
     try {
-      await authAPI.signup(data);
+      await authAPI.signup({ ...data, photo });
       toast.success('Account created! Please sign in.');
       navigate('/login');
     } catch (err) {
@@ -66,11 +78,22 @@ export default function RegisterPage() {
             <div className="login-error animate-fade-in">{serverError}</div>
           )}
 
-          <div className="register-avatar">
-            <div className="avatar-placeholder">
-              <Camera size={24} />
-            </div>
-            <span className="avatar-label">Upload Photo</span>
+          <div className="register-avatar" onClick={() => document.getElementById('avatar-input').click()} style={{ cursor: 'pointer' }}>
+            <input
+              type="file"
+              id="avatar-input"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handlePhotoChange}
+            />
+            {photo ? (
+              <img src={photo} alt="Avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              <div className="avatar-placeholder">
+                <Camera size={24} />
+              </div>
+            )}
+            <span className="avatar-label">{photo ? 'Change Photo' : 'Upload Photo'}</span>
           </div>
 
           <div className="register-grid">

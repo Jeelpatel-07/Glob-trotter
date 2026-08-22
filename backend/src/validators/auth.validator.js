@@ -9,6 +9,8 @@ export const signupSchema = z.object({
   city: z.string().max(100).optional().default(''),
   country: z.string().max(100).optional().default(''),
   additionalInfo: z.string().max(1000).optional().default(''),
+  photo: z.string().optional().default(''),
+  language: z.string().max(50).optional().default('English'),
 });
 
 export const loginSchema = z.object({

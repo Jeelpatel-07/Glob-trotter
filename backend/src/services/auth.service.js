@@ -19,13 +19,14 @@ const formatUser = (row) => ({
   phone: row.phone || '',
   city: row.city || '',
   country: row.country || '',
+  language: row.language || 'English',
   createdAt: row.created_at,
 });
 
 /**
  * Register a new user
  */
-export const signup = async ({ firstName, lastName, email, password, phone, city, country, additionalInfo }) => {
+export const signup = async ({ firstName, lastName, email, password, phone, city, country, additionalInfo, photo, language }) => {
   // Check for duplicate email
   const existing = await query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
   if (existing.rows.length > 0) {
@@ -35,10 +36,10 @@ export const signup = async ({ firstName, lastName, email, password, phone, city
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
   const result = await query(
-    `INSERT INTO users (first_name, last_name, email, password_hash, phone, city, country, additional_info)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `INSERT INTO users (first_name, last_name, email, password_hash, phone, city, country, additional_info, photo, language)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING *`,
-    [firstName, lastName, email.toLowerCase(), passwordHash, phone || '', city || '', country || '', additionalInfo || '']
+    [firstName, lastName, email.toLowerCase(), passwordHash, phone || '', city || '', country || '', additionalInfo || '', photo || null, language || 'English']
   );
 
   return formatUser(result.rows[0]);
@@ -61,6 +62,20 @@ export const login = async ({ email, password }) => {
 
   const token = generateToken({ id: user.id, email: user.email, role: user.role });
   return { user: formatUser(user), token };
+};
+
+export const resetPasswordByEmail = async (email) => {
+  if (!email) {
+    throw new ApiError('Email is required', 400);
+  }
+  const existing = await query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
+  if (existing.rows.length === 0) {
+    throw new ApiError('No traveler account found with this email', 404);
+  }
+
+  const passwordHash = await bcrypt.hash('password123', 12);
+  await query('UPDATE users SET password_hash = $1 WHERE email = $2', [passwordHash, email.toLowerCase()]);
+  return true;
 };
 
 export { formatUser };

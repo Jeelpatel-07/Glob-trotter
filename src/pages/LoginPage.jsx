@@ -8,6 +8,8 @@ import { authAPI } from '../api/auth.api';
 import useAuth from '../hooks/useAuth';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import Modal from '../components/common/Modal';
+import toast from 'react-hot-toast';
 import './LoginPage.css';
 
 const loginSchema = z.object({
@@ -22,9 +24,32 @@ export default function LoginPage() {
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
   });
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast.error('Email is required');
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      const res = await authAPI.forgotPassword(forgotEmail);
+      toast.success(res.message || 'Password reset success!');
+      setShowForgotModal(false);
+      setForgotEmail('');
+    } catch (err) {
+      toast.error(err.message || 'Failed to reset password');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -89,6 +114,23 @@ export default function LoginPage() {
             </button>
           </div>
 
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(true)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--accent)',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                padding: 0
+              }}
+            >
+              Forgot Password?
+            </button>
+          </div>
+
           <Button type="submit" fullWidth disabled={loading} size="lg">
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
@@ -147,6 +189,31 @@ export default function LoginPage() {
           <p>Don't have an account? <Link to="/register">Create one</Link></p>
         </div>
       </div>
+
+      <Modal isOpen={showForgotModal} onClose={() => setShowForgotModal(false)} title="Reset Password" size="sm">
+        <form onSubmit={handleForgotSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+            Enter your email address and we will reset your password to a temporary default password.
+          </p>
+          <Input
+            label="Email Address"
+            type="email"
+            placeholder="you@example.com"
+            icon={Mail}
+            value={forgotEmail}
+            onChange={(e) => setForgotEmail(e.target.value)}
+            required
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
+            <Button variant="ghost" type="button" onClick={() => setShowForgotModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={forgotLoading}>
+              {forgotLoading ? 'Resetting...' : 'Reset Password'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

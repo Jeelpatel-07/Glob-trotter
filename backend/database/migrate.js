@@ -28,9 +28,14 @@ async function runMigrations() {
         photo         TEXT DEFAULT NULL,
         additional_info TEXT DEFAULT '',
         role          VARCHAR(20) DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN')),
+        language      VARCHAR(50) DEFAULT 'English',
         created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
+    `);
+    // Ensure language column exists for existing tables
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(50) DEFAULT 'English';
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);`);
     console.log('✅ Users table ready');

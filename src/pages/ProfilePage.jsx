@@ -19,13 +19,20 @@ export default function ProfilePage() {
   const { user, updateUser, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [photo, setPhoto] = useState('');
 
   const { data: profileData, isLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: authAPI.getProfile,
   });
 
+  const { data: savedData, refetch: refetchSaved } = useQuery({
+    queryKey: ['saved-destinations'],
+    queryFn: authAPI.getSavedDestinations,
+  });
+
   const profile = profileData?.data || profileData || user;
+  const savedDestinations = Array.isArray(savedData?.data || savedData) ? (savedData?.data || savedData) : [];
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     values: {
@@ -35,8 +42,24 @@ export default function ProfilePage() {
       phone: profile?.phone || '',
       city: profile?.city || '',
       country: profile?.country || '',
+      language: profile?.language || 'English',
     },
   });
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhoto(reader.result);
+        if (!editing) {
+          // If not in editing mode, update photo immediately
+          updateMutation.mutate({ photo: reader.result });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const updateMutation = useMutation({
     mutationFn: (data) => authAPI.updateProfile(data),
@@ -44,8 +67,18 @@ export default function ProfilePage() {
       updateUser(res?.data || res);
       toast.success('Profile updated');
       setEditing(false);
+      setPhoto('');
     },
     onError: (err) => toast.error(err.message || 'Update failed'),
+  });
+
+  const deleteSavedDestMutation = useMutation({
+    mutationFn: (cityId) => authAPI.deleteSavedDestination(cityId),
+    onSuccess: () => {
+      toast.success('Destination removed');
+      refetchSaved();
+    },
+    onError: (err) => toast.error(err.message || 'Failed to remove destination'),
   });
 
   const deleteMutation = useMutation({
@@ -68,13 +101,20 @@ export default function ProfilePage() {
 
         <Card className="profile-card animate-fade-in-up">
           <div className="profile-header">
-            <div className="profile-avatar">
-              {profile?.photo ? (
-                <img src={profile.photo} alt={profile.firstName} />
+            <div className="profile-avatar" onClick={() => document.getElementById('avatar-input').click()} style={{ cursor: 'pointer' }}>
+              <input
+                type="file"
+                id="avatar-input"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handlePhotoChange}
+              />
+              {photo || profile?.photo ? (
+                <img src={photo || profile.photo} alt={profile.firstName} />
               ) : (
                 <User size={40} />
               )}
-              <button className="profile-avatar-edit"><Camera size={14} /></button>
+              <button className="profile-avatar-edit" type="button"><Camera size={14} /></button>
             </div>
             <div className="profile-name">
               <h2>{profile?.firstName} {profile?.lastName}</h2>
@@ -92,7 +132,35 @@ export default function ProfilePage() {
               <Input label="Phone" disabled={!editing} {...register('phone')} />
               <Input label="City" disabled={!editing} {...register('city')} />
             </div>
-            <Input label="Country" disabled={!editing} {...register('country')} />
+            <div className="register-grid">
+              <Input label="Country" disabled={!editing} {...register('country')} />
+              <div className="input-group input-full">
+                <label className="input-label">Language Preference</label>
+                <div className="input-wrapper">
+                  <select
+                    disabled={!editing}
+                    className="input-field"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-input)',
+                      border: 'none',
+                      color: 'var(--text-primary)',
+                      padding: '10px 14px',
+                      fontSize: '0.875rem',
+                      outline: 'none',
+                      borderRadius: 'var(--radius-md)'
+                    }}
+                    {...register('language')}
+                  >
+                    <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="French">French</option>
+                    <option value="German">German</option>
+                    <option value="Japanese">Japanese</option>
+                  </select>
+                </div>
+              </div>
+            </div>
 
             <div className="profile-actions">
               {editing ? (
@@ -107,6 +175,47 @@ export default function ProfilePage() {
               )}
             </div>
           </form>
+        </Card>
+
+        {/* Saved Destinations Section */}
+        <Card className="profile-card animate-fade-in-up" style={{ marginTop: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <Globe size={20} style={{ color: 'var(--accent)' }} />
+            <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Saved Destinations</h3>
+          </div>
+          {savedDestinations.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+              {savedDestinations.map((dest, i) => (
+                <div key={dest.id || i} style={{
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: 12,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: 12
+                }}>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: '0.95rem', color: 'var(--text-primary)' }}>{dest.name}</h4>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{dest.country || 'Destination'}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Button variant="ghost" size="sm" onClick={() => navigate(`/search/activities?cityId=${dest.id}&cityName=${dest.name}`)} style={{ padding: '4px 8px', fontSize: '0.75rem', flex: 1 }}>
+                      Explore
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => deleteSavedDestMutation.mutate(dest.id)} disabled={deleteSavedDestMutation.isPending} style={{ padding: '4px 8px', fontSize: '0.75rem', flex: 1 }}>
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>
+              No destinations bookmarked yet. Explore cities to save them to your profile.
+            </p>
+          )}
         </Card>
 
         <div className="profile-danger-zone">

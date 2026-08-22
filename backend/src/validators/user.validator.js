@@ -7,4 +7,6 @@ export const updateProfileSchema = z.object({
   phone: z.string().max(30).optional(),
   city: z.string().max(100).optional(),
   country: z.string().max(100).optional(),
+  photo: z.string().optional(),
+  language: z.string().max(50).optional(),
 });
