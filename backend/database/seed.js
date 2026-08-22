@@ -7,7 +7,8 @@ const { Client } = pg;
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/globetrotter';
 
 async function seed() {
-  const client = new Client({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  const isProduction = process.env.NODE_ENV === 'production';
+  const client = new Client({ connectionString: DATABASE_URL, ssl: isProduction ? { rejectUnauthorized: false } : false });
   try {
     await client.connect();
     console.log('\n🌱 Seeding full database...\n');

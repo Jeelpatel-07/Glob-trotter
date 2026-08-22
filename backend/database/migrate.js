@@ -6,9 +6,10 @@ const { Client } = pg;
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/globetrotter';
 
 async function runMigrations() {
+  const isProduction = process.env.NODE_ENV === 'production';
   const client = new Client({
     connectionString: DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: isProduction ? { rejectUnauthorized: false } : false,
   });
   try {
     await client.connect();
